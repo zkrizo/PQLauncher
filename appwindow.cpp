@@ -171,3 +171,7 @@ void AppWindow::restartLauncherforUpdate(QString passed){
 void AppWindow::setPlayButtonEnabled(bool b){
     playButton->setEnabled(b);
 }
+
+void AppWindow::setUpdateButtonLabel(QString str){
+    updateButton->setText(str);
+}
