@@ -28,7 +28,7 @@ MD5Batch::MD5Batch(QObject *parent): QObject(parent)
 {
     serverRoot="http://phantasyquest.dragonlensstudios.com/Storage/PhantasyQuest/Latest/";
     launcherRoot = "http://phantasyquest.dragonlensstudios.com/Storage/PhantasyQuest/Launcher/";
-    launchVersion = "1.002";
+    launchVersion = "1.003";
 }
 
 //hashFile() opens and hashes the file sent. Note: Filepath is in GLOBAL coordinates, not LOCAL!
@@ -64,7 +64,6 @@ void MD5Batch::hashFile(std::string filename, std::string filepath){
 
 }
 
-
 //setComparePath() sets the comparison file path if applicable that stores the last versions MD5s for comparison with this
 //new version.
 void MD5Batch::setComparePath(std::string path){
@@ -93,6 +92,7 @@ void MD5Batch::discoverFolderRoot(){
     discoverCurrentVersion();
 }
 
+//discoverCurrentVersion() grabs the current version from the local directory path
 void MD5Batch::discoverCurrentVersion(){
     ifstream readFile;
 
@@ -107,10 +107,14 @@ void MD5Batch::discoverCurrentVersion(){
             currentVersion=version;
         }
     }
+    else {
+        currentVersion=-1;
+    }
 
     readFile.close();
 }
 
+//grabCurrentVersion() grabs the current version from the web server
 bool MD5Batch::grabCurrentVersion()
 {
     string filename=serverRoot;
@@ -134,9 +138,10 @@ bool MD5Batch::grabCurrentVersion()
 
 }
 
-bool MD5Batch::updateCheck(){
+//updateCheck() checks the current version against the local vesion
+int MD5Batch::updateCheck(){
     if(!grabCurrentVersion()){
-        return false;
+        return -1;
     }
 
     if(serverVersion!=currentVersion){
@@ -145,7 +150,7 @@ bool MD5Batch::updateCheck(){
     return false;
 }
 
-
+//parseServerFiles() compares the server files against the local files
 void MD5Batch::parseServerFiles(){
     string serverFile = serverRoot;
     serverFile.append(serverVersion);
@@ -223,6 +228,7 @@ void MD5Batch::parseServerFiles(){
     //on their statusDiff flag
 }
 
+//grabChanges() grabs any files from the server that are different from local version
 void MD5Batch::grabChanges(){
     emit setProgressMaximum(fileDiff.size());
 
@@ -243,7 +249,7 @@ void MD5Batch::grabChanges(){
 			emit setProgress(i);
 
         if(statusDiff[i]==FILE_DELETED){
-            //Delete the local file
+            //Delete the local file - Disabled temporarilly to avoid abuse until workaround is solved
             string localpath=rootPath;
             localpath.append(fileDiff[i]);
             if(boost::filesystem::exists(boost::filesystem::path(localpath))){
@@ -424,7 +430,6 @@ int MD5Batch::launcherCheck(){
     return false;
 }
 
-
 //launcherUpdate() downloads the new launcher, and puts important data in place to update the launcher
 bool MD5Batch::launcherUpdate(){
     discoverFolderRoot();
@@ -508,6 +513,7 @@ bool MD5Batch::launcherUpdate(){
 	return false;
 }
 
+//launcherCopy() copies the new launcher exe from appdata to the install directory
 void MD5Batch::launcherCopy(){
     string from(appdataRoot);
     from.append("PQLauncher.exe");
@@ -519,6 +525,7 @@ void MD5Batch::launcherCopy(){
     boost::filesystem::remove(dat);
 }
 
+//deleteAppDataFiles() cleans up the appdata files that are needed to launch the launcher from appdata
 void MD5Batch::deleteAppDataFiles(){
     vector<boost::filesystem::path> fileList;
     boost::filesystem::path file;
@@ -579,6 +586,7 @@ void MD5Batch::deleteAppDataFiles(){
     }
 }
 
+//createAppDataFiles() copies over the required files to appdata to prepare for the launcher overwrite
 void MD5Batch::createAppDataFiles(){
     vector<boost::filesystem::path> fileList;
     vector<boost::filesystem::path> fromList;

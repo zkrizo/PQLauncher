@@ -10,16 +10,14 @@ SOURCES += main.cpp\
     md5.cpp \
     md5batch.cpp \
     updatecheck.cpp \
-    updatefiles.cpp \
-    object.cpp
+    updatefiles.cpp
 
 HEADERS  += \
     appwindow.h \
     md5.h \
     md5batch.h \
     updatecheck.h \
-    updatefiles.h \
-    object.h
+    updatefiles.h
 
 
 INCLUDEPATH += "G:\Program Files\Boost\boost_1_55_0"

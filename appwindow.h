@@ -31,6 +31,7 @@ public slots:
     void setLabel(QString);
     void restartLauncherforUpdate(QString);
     void setPlayButtonEnabled(bool);
+    void setUpdateButtonLabel(QString);
 
 private:
     QWebView* view;

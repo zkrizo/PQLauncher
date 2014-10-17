@@ -10,6 +10,7 @@ class updateCheck : public QObject
 signals:
     void setUpdateButtonStatus(bool);
     void restartLauncher(QString);
+    void setUpdateButtonLabel(QString);
 public slots:
     void run();
 public:

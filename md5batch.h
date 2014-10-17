@@ -17,12 +17,12 @@ public:
     void discoverFolderRoot();
     void parseServerFiles();
     void grabChanges();
-    bool grabCurrentVersion();
-    bool updateCheck();
-    std::string getRootPath(){return rootPath;}
-    int launcherCheck();
-    bool launcherUpdate();
     void launcherCopy();
+    int launcherCheck();
+    bool grabCurrentVersion();
+    int updateCheck();
+    bool launcherUpdate();
+    std::string getRootPath(){return rootPath;}
     std::string appdataRoot;
     std::string getLaunchVersionNumber(){return launchVersion;}
     std::string getServerVersion(){return serverVersion;}

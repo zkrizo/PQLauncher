@@ -10,6 +10,7 @@ using namespace std;
 AppWindow::AppWindow(QWidget *parent) :
     QWidget(parent)
 {
+    //Creates the QT variables
     QWidget::setWindowIcon(QIcon("PQIcon.ico"));
     playButton=new QPushButton(tr("Play"));
     updateButton=new QPushButton(tr("Update"));
@@ -29,6 +30,7 @@ AppWindow::AppWindow(QWidget *parent) :
     double screenResolution=screenSize.width()/screenSize.height();
     int width,height,minW,minH;
 
+    //Sets up the resolution for the launcher window based on screen resolution
     if(screenResolution==4/3){
         width=(screenSize.width()/4)*.8*4;
         height=(screenSize.height()/3)*.8*3;
@@ -77,6 +79,7 @@ AppWindow::AppWindow(QWidget *parent) :
     layout->addLayout(hlayout);
     setLayout(layout);
 
+    //Connect the signals and slots
     connect(integrityCheck,SIGNAL(pressed()),this,SLOT(updateLocal()));
     connect(updateButton,SIGNAL(pressed()),this,SLOT(updateLocal()));
     connect(playButton,SIGNAL(pressed()),this,SLOT(launchGame()));
@@ -90,6 +93,7 @@ AppWindow::AppWindow(QWidget *parent) :
     connect(hash,SIGNAL(setLabel(QString)),this,SLOT(setLabel(QString)));
     connect(update,SIGNAL(restartLauncher(QString)),this,SLOT(restartLauncherforUpdate(QString)));
     connect(download,SIGNAL(setPlayButton(bool)),this,SLOT(setPlayButtonEnabled(bool)));
+    connect(update,SIGNAL(setUpdateButtonLabel(QString)),this,SLOT(setUpdateButtonLabel(QString)));
 	
 	download->moveToThread(tDownload);
 	update->moveToThread(tUpdate);

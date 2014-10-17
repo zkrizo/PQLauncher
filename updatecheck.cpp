@@ -11,14 +11,20 @@ void updateCheck::run(){
         return;
     }
     int launcherUpdate = hash->launcherCheck();
-    bool result;
+    int result;
     std::string appdata;
 
     switch(launcherUpdate){
     case 0:
         hash->discoverFolderRoot();
         result=hash->updateCheck();
-        emit setUpdateButtonStatus(result);
+        if(result==-1){
+            emit setUpdateButtonLabel("Download");
+            emit setUpdateButtonStatus(true);
+        }
+        else{
+            emit setUpdateButtonStatus(result);
+        }
 		break;
     case 1:
         hash->launcherUpdate();
