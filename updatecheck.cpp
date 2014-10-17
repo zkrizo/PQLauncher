@@ -1,4 +1,5 @@
 #include "updatecheck.h"
+#include <qmessagebox.h>
 
 updateCheck::updateCheck(MD5Batch *hashptr){
     if(hashptr!=NULL){
@@ -13,12 +14,13 @@ void updateCheck::run(){
     int launcherUpdate = hash->launcherCheck();
     int result;
     std::string appdata;
+        QMessageBox msg;
 
     switch(launcherUpdate){
     case 0:
         hash->discoverFolderRoot();
         result=hash->updateCheck();
-        if(result==-1){
+        if(hash->getCurrentVersion()=="-1"){
             emit setUpdateButtonLabel("Download");
             emit setUpdateButtonStatus(true);
         }

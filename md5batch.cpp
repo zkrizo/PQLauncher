@@ -108,7 +108,7 @@ void MD5Batch::discoverCurrentVersion(){
         }
     }
     else {
-        currentVersion=-1;
+        currentVersion="-1";
     }
 
     readFile.close();

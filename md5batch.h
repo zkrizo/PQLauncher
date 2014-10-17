@@ -26,6 +26,7 @@ public:
     std::string appdataRoot;
     std::string getLaunchVersionNumber(){return launchVersion;}
     std::string getServerVersion(){return serverVersion;}
+    std::string getCurrentVersion(){return currentVersion;}
 signals:
     void setProgressMaximum(int);
     void setProgress(int);
