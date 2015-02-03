@@ -1,4 +1,4 @@
-QT       += core gui widgets webkit network webkitwidgets
+QT       += core gui widgets webenginewidgets
 
 CONFIG += qt
 

@@ -2,13 +2,14 @@
 #define APPWINDOW_H
 
 #include <QWidget>
-#include <QtWebKitWidgets/QWebView>
-#include <QtWebKitWidgets/QWebFrame>
-#include <QtWebKitWidgets/QWebPage>
+
 #include <QPushButton>
 #include <QVBoxLayout>
 #include <QProgressBar>
 #include <QLabel>
+#include <QWebEnginePage>
+#include <QWebEngineView>
+#include <QtWebEngineWidgets/QtWebEngineWidgets>
 #include "md5batch.h"
 #include "updatecheck.h"
 #include "updatefiles.h"
@@ -34,9 +35,8 @@ public slots:
     void setUpdateButtonLabel(QString);
 
 private:
-    QWebView* view;
-    QWebPage* page;
-    QWebFrame* frame;
+    QWebEngineView* view;
+    QWebEnginePage* page;
     QPushButton* playButton;
     QPushButton* updateButton;
     QPushButton* integrityCheck;

@@ -18,7 +18,7 @@ AppWindow::AppWindow(QWidget *parent) :
     layout=new QVBoxLayout;
     hlayout=new QHBoxLayout;
     progress=new QProgressBar;
-    view= new QWebView();
+    view= new QWebEngineView();
     statusLabel = new QLabel;
     hash = new MD5Batch();
     update = new updateCheck(hash);
@@ -59,7 +59,6 @@ AppWindow::AppWindow(QWidget *parent) :
 
     view->load(QUrl("http://www.dragonlensstudios.com"));
     page = view->page();
-    frame = page->currentFrame();
 
     setMaximumSize(width,height);
     setMinimumSize(minW,minH);
