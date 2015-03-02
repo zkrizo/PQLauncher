@@ -2,6 +2,7 @@
 #define MD5BATCH_H
 
 #include <vector>
+#include <sstream>
 #include <QObject>
 #include <string>
 
@@ -61,6 +62,8 @@ private:
     void discoverCurrentVersion();
     void deleteAppDataFiles();
     void createAppDataFiles();
+	std::stringstream file;
+	void downloadFileFromServer(const std::string& filename,std::stringstream& stream);
 };
 
 #endif // MD5BATCH_H

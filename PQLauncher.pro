@@ -3,7 +3,7 @@ QT       += core gui widgets webenginewidgets
 CONFIG += qt
 
 TARGET = PQLauncher
-TEMPLATE = app
+TEMPLATE = vcapp
 
 SOURCES += main.cpp\
     appwindow.cpp \

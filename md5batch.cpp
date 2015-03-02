@@ -5,7 +5,8 @@
 #include "md5batch.h"
 #include <QMessageBox>
 #include <fstream>
-#include <urdl/istream.hpp>
+//#include <urdl/istream.hpp>
+#include <boost\asio.hpp>
 #include <boost/filesystem.hpp>
 #include <boost\algorithm\string\replace.hpp>
 #include <Windows.h>
@@ -14,6 +15,7 @@
 #include <ObjBase.h>
 #include <stdio.h>
 #include <errno.h>
+#include <string.h>
 
 using namespace std;
 
@@ -119,23 +121,15 @@ bool MD5Batch::grabCurrentVersion()
 {
     string filename=serverRoot;
     filename.append("currentVersion.dat");
-    urdl::istream is(filename);
-    string version;
+	stringstream ss;
+	downloadFileFromServer(filename, ss);
+    string version=ss.str();
 
-    if(!is){
+    if(version==""){
         return false;
     }
-
-    if(getline(is,version)){
-        serverVersion=version;
-		is.close();
-        return true;
-    }
-    else{
-		is.close();
-        return false;
-    }
-
+    serverVersion=version;
+	return true;
 }
 
 //updateCheck() checks the current version against the local vesion
@@ -156,29 +150,33 @@ void MD5Batch::parseServerFiles(){
     serverFile.append(serverVersion);
     serverFile.append("%20-%20Full.dat");
     string input;
+	stringstream fileInput;
+	downloadFileFromServer(serverFile,fileInput);
 
-    urdl::istream is(serverFile);
-
-    if(!is){
-        return;
-    }
+	string delim="\n";
+	size_t pos = 0;
 
     bool filestate=true;
     while(filestate){
-        filestate=getline(is,input);
-        if(filestate){
-            updateFiles.push_back(input);
-        }
-        else{
-            break;
-        }
+		if (!getline(fileInput, input))
+		{
+			filestate = false;
+			break;
+		}
+		updateFiles.push_back(input);
 
-        filestate=getline(is,input);
-        if(filestate){
-            updateMd5hashes.push_back(input);
-        }
+		if (!getline(fileInput, input))
+		{
+			filestate = false;
+			break;
+		}
+		updateMd5hashes.push_back(input);
 
-        filestate=getline(is,input);
+		if (!getline(fileInput, input))
+		{
+			filestate = false;
+			break;
+		}
     }
 
     bool *compareCheck = new bool[updateFiles.size()];
@@ -276,8 +274,6 @@ void MD5Batch::grabChanges(){
                 tempFile.append(QString::fromStdString(file));
 
                 ofstream outFile;
-                urdl::istream inFile;
-
                 outFile.open(tempFile.toUtf8().constData(),ios_base::binary);
 
 				//If folder doesn't exist, run through Boost's filesystem to create the directory and try reopening file
@@ -300,8 +296,9 @@ void MD5Batch::grabChanges(){
 					//Ensure that path is correct for urls
 					boost::replace_all(serverpath,"\\","/");
 					boost::replace_all(serverpath," ","%20");
-                    inFile.open(serverpath);
-
+					stringstream inFile;
+					downloadFileFromServer(serverpath,inFile);
+					
 					if(inFile.good()){
 						string endline;
 						string extension = tempFile.toUtf8().constData();
@@ -326,7 +323,7 @@ void MD5Batch::grabChanges(){
                         outFile.clear();
                         outFile.close();
                         inFile.clear();
-                        inFile.close();
+                        //**inFile.close();
 
 						string directory(localpath);
 						directory.erase(directory.begin()+directory.find_last_of('\\'),directory.end());
@@ -401,21 +398,20 @@ int MD5Batch::launcherCheck(){
         string launcherDat=launcherRoot;
         string buffer;
         launcherDat.append("launcherVersion.dat");
-        urdl::istream inFile(launcherDat);
+
+		stringstream inFile;
+		downloadFileFromServer(launcherDat,inFile);
 
         if(inFile.good()){
             if(getline(inFile,buffer)){
                 serverLaunchVersion=buffer;
             }
             else{
-                inFile.close();
-
                 CoTaskMemFree(static_cast<void*>(localAppData));
                 return false;
             }
 
             inFile.clear();
-            inFile.close();
 
             if(serverLaunchVersion!=launchVersion){
 
@@ -436,19 +432,18 @@ bool MD5Batch::launcherUpdate(){
     string launcherDat=launcherRoot;
     string buffer;
     launcherDat.append("launcherVersion.dat");
-    urdl::istream inFile(launcherDat);
+	stringstream inFile;
+	downloadFileFromServer(launcherDat,inFile);
 
     if(inFile.good()){
         if(getline(inFile,buffer)){
             serverLaunchVersion=buffer;
         }
         else{
-            inFile.close();
             return false;
         }
 
         inFile.clear();
-        inFile.close();
 
         if(serverLaunchVersion!=launchVersion){
             wchar_t* localAppData =0;
@@ -481,7 +476,8 @@ bool MD5Batch::launcherUpdate(){
             string output = dir.string();
             output.append("PQLauncher.exe");
 
-            inFile.open(launcherexe);
+			stringstream inFile;
+			downloadFileFromServer(launcherexe,inFile);
 
             if(inFile.good()){
                 outFile.open(output,ios_base::binary);
@@ -502,7 +498,6 @@ bool MD5Batch::launcherUpdate(){
 
 
             CoTaskMemFree(static_cast<void*>(localAppData));
-            inFile.close();
             outFile.close();
             return true;
         }
@@ -689,4 +684,47 @@ void MD5Batch::createAppDataFiles(){
             msg.exec();
         }
     }
+}
+
+void MD5Batch::downloadFileFromServer(const std::string& filename,std::stringstream& ss)
+{
+	try
+	{
+		boost::asio::ip::tcp::iostream stream(serverRoot, "http");
+		stream.expires_from_now(boost::posix_time::seconds(60));
+
+		if (!stream)
+			throw "Unable to connect to server: " + stream.error().message();
+
+		stream << "GET " << filename << " HTTP/1.0\r\n";
+		stream << "HOST " << serverRoot << "\r\n";
+		stream << "Accept: */*\r\n";
+		stream << "Connection: close\r\n\r\n";
+
+		//Check response
+		string httpVer;
+		stream >> httpVer;
+		unsigned int statCode;
+		stream >> statCode;
+		string statMes;
+		getline(stream, statMes);
+		if (!stream || httpVer.substr(0, 5) != "HTTP/")
+			throw "Invalid Response\n";
+		if (statCode != 200)
+			throw "Response returned with code: " + statCode;
+
+		//Process Headers
+		string header;
+		while (getline(stream, header) && header != "\r")
+			cout << header << "\n";
+		cout << "\n";
+
+		//Write data to output
+		ss << stream.rdbuf();
+	}
+	catch (std::exception& e)
+	{
+		stringstream errstream;
+		errstream << e.what();
+	}
 }

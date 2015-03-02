@@ -11,7 +11,7 @@ AppWindow::AppWindow(QWidget *parent) :
     QWidget(parent)
 {
     //Creates the QT variables
-    QWidget::setWindowIcon(QIcon("PQIcon.ico"));
+    //QWidget::setWindowIcon(QIcon("PQIcon.ico"));
     playButton=new QPushButton(tr("Play"));
     updateButton=new QPushButton(tr("Update"));
     integrityCheck = new QPushButton(tr("Check File Integrity"));

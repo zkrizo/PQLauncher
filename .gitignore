@@ -1,0 +1,7 @@
+*.obj
+debug/
+release/
+Makefile*
+*.sdf
+*.suo
+*.vcxproj*
